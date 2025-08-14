@@ -57,26 +57,14 @@
     </div>
 
     <script>
-        function getParameterByName(name) {
-            const url = window.location.href;
-            const paramName = name.replace(/[\[\]]/g, '\\$&');
-            const regex = new RegExp('[?&]' + paramName + '(=([^&#]*)|&|#|$)');
-            const results = regex.exec(url);
-            if (!results) return null;
-            if (!results[2]) return '';
-            return decodeURIComponent(results[2].replace(/\+/g, ' '));
-        }
-
-        function getBase64Parameter(name) {
-            const param = getParameterByName(name);
-            if (!param) return null;
-            try {
-                return atob(param);
-            } catch (e) {
-                console.warn('Invalid base64 parameter:', name);
-                return param; // fallback to original if not base64
-            }
-        }
+        // ========== CONFIGURAÇÃO DOS LINKS ==========
+        // Altere apenas estas 3 variáveis para cada redirecionamento:
+        
+        const PLAYSTORE_URL = 'https://play.google.com/store/apps/details?id=com.zitskegroup.jsonclock';
+        const APPSTORE_URL = 'https://apps.apple.com/us/app/json-clock/id6746350179';
+        const DEFAULT_URL = 'https://www.zitskegroup.com';
+        
+        // ===============================================
 
         function detectPlatform() {
             const userAgent = navigator.userAgent || navigator.vendor || window.opera;
@@ -97,57 +85,29 @@
 
         function redirect() {
             try {
-                // Gets URL parameters (supports both normal and base64 encoded)
-                let playstoreUrl = getBase64Parameter('ps') || getParameterByName('playstore');
-                let appstoreUrl = getBase64Parameter('as') || getParameterByName('appstore');
-                
-                // Check for POST data (if submitted via form)
-                const urlParams = new URLSearchParams(window.location.search);
-                const postData = new URLSearchParams(window.location.hash.substring(1));
-                
-                if (!playstoreUrl && postData.get('playstore')) {
-                    playstoreUrl = postData.get('playstore');
-                }
-                if (!appstoreUrl && postData.get('appstore')) {
-                    appstoreUrl = postData.get('appstore');
-                }
-                
-                const defaultUrl = 'https://www.zitskegroup.com';
-                
-                console.log('Playstore URL:', playstoreUrl);
-                console.log('Appstore URL:', appstoreUrl);
+                console.log('Play Store URL:', PLAYSTORE_URL);
+                console.log('App Store URL:', APPSTORE_URL);
+                console.log('Default URL:', DEFAULT_URL);
                 
                 // Detects platform
                 const platform = detectPlatform();
                 console.log('Detected platform:', platform);
                 
-                let redirectUrl = defaultUrl;
+                let redirectUrl = DEFAULT_URL;
                 
                 switch (platform) {
                     case 'ios':
-                        if (appstoreUrl && appstoreUrl.trim() !== '') {
-                            redirectUrl = appstoreUrl;
-                        } else {
-                            console.warn('App Store URL not provided, using default URL');
-                        }
+                        redirectUrl = APPSTORE_URL;
                         break;
                         
                     case 'android':
-                        if (playstoreUrl && playstoreUrl.trim() !== '') {
-                            redirectUrl = playstoreUrl;
-                        } else {
-                            console.warn('Play Store URL not provided, using default URL');
-                        }
+                        redirectUrl = PLAYSTORE_URL;
                         break;
                         
                     case 'web':
                     default:
-                        // For web, uses Play Store if available, otherwise uses default
-                        if (playstoreUrl && playstoreUrl.trim() !== '') {
-                            redirectUrl = playstoreUrl;
-                        } else {
-                            console.warn('Play Store URL not provided for web, using default URL');
-                        }
+                        // For web, uses Play Store
+                        redirectUrl = PLAYSTORE_URL;
                         break;
                 }
                 
@@ -164,7 +124,7 @@
                 
                 // Redirects to default site in case of error
                 setTimeout(() => {
-                    window.location.href = 'https://www.zitskegroup.com';
+                    window.location.href = DEFAULT_URL;
                 }, 3000);
             }
         }
