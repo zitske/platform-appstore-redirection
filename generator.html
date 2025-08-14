@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Generator - Platform Redirection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #000000 0%, #313131 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="url"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #555;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+        }
+        input[type="url"]::placeholder {
+            color: #ccc;
+        }
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 255, 0, 0.1);
+            border-radius: 8px;
+            word-break: break-all;
+        }
+        .method {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .copy-btn {
+            background: #28a745;
+            font-size: 12px;
+            padding: 5px 10px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Platform Redirection URL Generator</h1>
+        <p>Generate secure URLs that bypass Mod_Security restrictions</p>
+
+        <div class="form-group">
+            <label for="playstore">Play Store URL:</label>
+            <input type="url" id="playstore" placeholder="https://play.google.com/store/apps/details?id=com.example.app">
+        </div>
+
+        <div class="form-group">
+            <label for="appstore">App Store URL:</label>
+            <input type="url" id="appstore" placeholder="https://apps.apple.com/app/example-app/id123456789">
+        </div>
+
+        <button onclick="generateUrls()">Generate URLs</button>
+        <button onclick="clearFields()">Clear</button>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        function generateUrls() {
+            const playstore = document.getElementById('playstore').value;
+            const appstore = document.getElementById('appstore').value;
+            const baseUrl = 'http://appredirect.zitskegroup.com/';
+            
+            if (!playstore && !appstore) {
+                alert('Please enter at least one store URL');
+                return;
+            }
+
+            let results = '<h3>📱 Generated URLs:</h3>';
+
+            // Method 1: Base64 encoded (Recommended)
+            if (playstore || appstore) {
+                const psEncoded = playstore ? btoa(playstore) : '';
+                const asEncoded = appstore ? btoa(appstore) : '';
+                
+                let params = [];
+                if (psEncoded) params.push(`ps=${psEncoded}`);
+                if (asEncoded) params.push(`as=${asEncoded}`);
+                
+                const base64Url = `${baseUrl}?${params.join('&')}`;
+                
+                results += `
+                    <div class="method">
+                        <h4>🔒 Method 1: Base64 Encoded (Recommended)</h4>
+                        <div class="result">
+                            ${base64Url}
+                            <button class="copy-btn" onclick="copyToClipboard('${base64Url.replace(/'/g, "\\'")}')">Copy</button>
+                        </div>
+                        <small>✅ Bypasses Mod_Security • ✅ Shorter URLs • ✅ More secure</small>
+                    </div>
+                `;
+            }
+
+            // Method 2: Original format (for comparison)
+            if (playstore || appstore) {
+                let params = [];
+                if (playstore) params.push(`playstore=${encodeURIComponent(playstore)}`);
+                if (appstore) params.push(`appstore=${encodeURIComponent(appstore)}`);
+                
+                const originalUrl = `${baseUrl}?${params.join('&')}`;
+                
+                results += `
+                    <div class="method">
+                        <h4>⚠️ Method 2: Original Format (May be blocked)</h4>
+                        <div class="result">
+                            ${originalUrl}
+                            <button class="copy-btn" onclick="copyToClipboard('${originalUrl.replace(/'/g, "\\'")}')">Copy</button>
+                        </div>
+                        <small>❌ May trigger Mod_Security • ❌ Longer URLs</small>
+                    </div>
+                `;
+            }
+
+            // Method 3: POST form
+            results += `
+                <div class="method">
+                    <h4>🚀 Method 3: POST Form (Advanced)</h4>
+                    <button onclick="generatePostForm()">Generate POST Form</button>
+                    <small>✅ Completely bypasses URL restrictions • ✅ Most secure</small>
+                </div>
+            `;
+
+            document.getElementById('results').innerHTML = results;
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('URL copied to clipboard!');
+            });
+        }
+
+        function clearFields() {
+            document.getElementById('playstore').value = '';
+            document.getElementById('appstore').value = '';
+            document.getElementById('results').innerHTML = '';
+        }
+
+        function generatePostForm() {
+            const playstore = document.getElementById('playstore').value;
+            const appstore = document.getElementById('appstore').value;
+            
+            const formHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Redirecting...</title>
+</head>
+<body onload="document.getElementById('redirectForm').submit();">
+    <form id="redirectForm" action="http://appredirect.zitskegroup.com/" method="POST">
+        ${playstore ? `<input type="hidden" name="playstore" value="${playstore}">` : ''}
+        ${appstore ? `<input type="hidden" name="appstore" value="${appstore}">` : ''}
+    </form>
+    <p>Redirecting...</p>
+</body>
+</html>`;
+
+            const blob = new Blob([formHtml], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'redirect-form.html';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Auto-generate on page load if URLs are in the URL parameters
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const ps = urlParams.get('ps');
+            const as = urlParams.get('as');
+            
+            if (ps) document.getElementById('playstore').value = ps;
+            if (as) document.getElementById('appstore').value = as;
+            
+            if (ps || as) generateUrls();
+        };
+    </script>
+</body>
+</html>

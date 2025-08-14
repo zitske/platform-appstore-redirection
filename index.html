@@ -67,6 +67,17 @@
             return decodeURIComponent(results[2].replace(/\+/g, ' '));
         }
 
+        function getBase64Parameter(name) {
+            const param = getParameterByName(name);
+            if (!param) return null;
+            try {
+                return atob(param);
+            } catch (e) {
+                console.warn('Invalid base64 parameter:', name);
+                return param; // fallback to original if not base64
+            }
+        }
+
         function detectPlatform() {
             const userAgent = navigator.userAgent || navigator.vendor || window.opera;
             
@@ -86,9 +97,21 @@
 
         function redirect() {
             try {
-                // Gets URL parameters
-                const playstoreUrl = getParameterByName('playstore');
-                const appstoreUrl = getParameterByName('appstore');
+                // Gets URL parameters (supports both normal and base64 encoded)
+                let playstoreUrl = getBase64Parameter('ps') || getParameterByName('playstore');
+                let appstoreUrl = getBase64Parameter('as') || getParameterByName('appstore');
+                
+                // Check for POST data (if submitted via form)
+                const urlParams = new URLSearchParams(window.location.search);
+                const postData = new URLSearchParams(window.location.hash.substring(1));
+                
+                if (!playstoreUrl && postData.get('playstore')) {
+                    playstoreUrl = postData.get('playstore');
+                }
+                if (!appstoreUrl && postData.get('appstore')) {
+                    appstoreUrl = postData.get('appstore');
+                }
+                
                 const defaultUrl = 'https://www.zitskegroup.com';
                 
                 console.log('Playstore URL:', playstoreUrl);
