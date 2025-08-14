@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Redirection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #000000 0%, #313131 100%);
+            color: white;
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        .loading {
+            margin-top: 20px;
+        }
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid white;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            color: #ff6b6b;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Detecting platform...</h2>
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Redirecting to the appropriate store</p>
+        </div>
+        <div id="error-message" class="error" style="display: none;">
+            Error detecting platform. Redirecting to main website...
+        </div>
+    </div>
+
+    <script>
+        function getParameterByName(name) {
+            const url = window.location.href;
+            const paramName = name.replace(/[\[\]]/g, '\\$&');
+            const regex = new RegExp('[?&]' + paramName + '(=([^&#]*)|&|#|$)');
+            const results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, ' '));
+        }
+
+        function detectPlatform() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            
+            // Detects iOS
+            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+                return 'ios';
+            }
+            
+            // Detects Android
+            if (/android/i.test(userAgent)) {
+                return 'android';
+            }
+            
+            // Default for web (desktop/others)
+            return 'web';
+        }
+
+        function redirect() {
+            try {
+                // Gets URL parameters
+                const playstoreUrl = getParameterByName('playstore');
+                const appstoreUrl = getParameterByName('appstore');
+                const defaultUrl = 'https://www.zitskegroup.com';
+                
+                console.log('Playstore URL:', playstoreUrl);
+                console.log('Appstore URL:', appstoreUrl);
+                
+                // Detects platform
+                const platform = detectPlatform();
+                console.log('Detected platform:', platform);
+                
+                let redirectUrl = defaultUrl;
+                
+                switch (platform) {
+                    case 'ios':
+                        if (appstoreUrl && appstoreUrl.trim() !== '') {
+                            redirectUrl = appstoreUrl;
+                        } else {
+                            console.warn('App Store URL not provided, using default URL');
+                        }
+                        break;
+                        
+                    case 'android':
+                        if (playstoreUrl && playstoreUrl.trim() !== '') {
+                            redirectUrl = playstoreUrl;
+                        } else {
+                            console.warn('Play Store URL not provided, using default URL');
+                        }
+                        break;
+                        
+                    case 'web':
+                    default:
+                        // For web, uses Play Store if available, otherwise uses default
+                        if (playstoreUrl && playstoreUrl.trim() !== '') {
+                            redirectUrl = playstoreUrl;
+                        } else {
+                            console.warn('Play Store URL not provided for web, using default URL');
+                        }
+                        break;
+                }
+                
+                console.log('Redirecting to:', redirectUrl);
+                
+                // Adds a small delay to show the message
+                setTimeout(() => {
+                    window.location.href = redirectUrl;
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Error processing redirection:', error);
+                document.getElementById('error-message').style.display = 'block';
+                
+                // Redirects to default site in case of error
+                setTimeout(() => {
+                    window.location.href = 'https://www.zitskegroup.com';
+                }, 3000);
+            }
+        }
+
+        // Starts redirection when page loads
+        document.addEventListener('DOMContentLoaded', redirect);
+    </script>
+</body>
+</html>
