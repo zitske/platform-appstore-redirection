@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Redirection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #000000 0%, #313131 100%);
+            color: white;
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        .loading {
+            margin-top: 20px;
+        }
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid white;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            color: #ff6b6b;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Detecting platform...</h2>
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Redirecting to the appropriate store</p>
+        </div>
+        <div id="error-message" class="error" style="display: none;">
+            Error detecting platform. Redirecting to main website...
+        </div>
+    </div>
+
+    <script>
+        // ========== CONFIGURAÇÃO DOS LINKS ==========
+        // Altere apenas estas 3 variáveis para cada redirecionamento:
+        
+        const PLAYSTORE_URL = 'https://play.google.com/store/apps/details?id=com.zitskegroup.santavalley&utm_source=na_Med';
+        const APPSTORE_URL = 'https://apps.apple.com/us/app/santa-valley-comunidade/id6748237949';
+        const DEFAULT_URL = 'https://www.zitskegroup.com';
+        
+        // ===============================================
+
+        function detectPlatform() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            
+            // Detects iOS
+            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+                return 'ios';
+            }
+            
+            // Detects Android
+            if (/android/i.test(userAgent)) {
+                return 'android';
+            }
+            
+            // Default for web (desktop/others)
+            return 'web';
+        }
+
+        function redirect() {
+            try {
+                console.log('Play Store URL:', PLAYSTORE_URL);
+                console.log('App Store URL:', APPSTORE_URL);
+                console.log('Default URL:', DEFAULT_URL);
+                
+                // Detects platform
+                const platform = detectPlatform();
+                console.log('Detected platform:', platform);
+                
+                let redirectUrl = DEFAULT_URL;
+                
+                switch (platform) {
+                    case 'ios':
+                        redirectUrl = APPSTORE_URL;
+                        break;
+                        
+                    case 'android':
+                        redirectUrl = PLAYSTORE_URL;
+                        break;
+                        
+                    case 'web':
+                    default:
+                        // For web, uses Play Store
+                        redirectUrl = PLAYSTORE_URL;
+                        break;
+                }
+                
+                console.log('Redirecting to:', redirectUrl);
+                
+                // Adds a small delay to show the message
+                setTimeout(() => {
+                    window.location.href = redirectUrl;
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Error processing redirection:', error);
+                document.getElementById('error-message').style.display = 'block';
+                
+                // Redirects to default site in case of error
+                setTimeout(() => {
+                    window.location.href = DEFAULT_URL;
+                }, 3000);
+            }
+        }
+
+        // Starts redirection when page loads
+        document.addEventListener('DOMContentLoaded', redirect);
+    </script>
+</body>
+</html>
